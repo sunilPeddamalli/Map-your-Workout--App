@@ -11,6 +11,43 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
+class Workout {
+    date = new Date();
+    id = (Date.now() + '').slice(-10);
+
+    constructor(coords, distance, duration) {
+        this.coords = coords;
+        this.distance = distance; // in km
+        this.duration = duration; // in min
+    };
+};
+
+class Running extends Workout {
+    constructor(coords, distance, duration, cadence) {
+        super(coords, distance, duration);
+        this.cadence = cadence;
+        this.calcPace()
+    };
+
+    calcPace() {
+        this.pace = this.duration / this.distance;
+    };
+};
+
+class Cycling extends Workout {
+    constructor(coords, distance, duration, elevatioinGain) {
+        super(coords, distance, duration);
+        this.elevatioinGain = elevatioinGain;
+        this.calcSpeed();
+    };
+
+    calcSpeed() {
+        this.speed = this.distance / (this.duration / 60);
+    };
+};
+
+const run1 = new Running([38.5744896, -121.29402879999999], 3, 33, 30);
+console.log(run1);
 
 class App {
     #map;
@@ -60,7 +97,31 @@ class App {
     }
 
     _newWorkout(e) {
+        const validInputs = (...inputs) => inputs.every(inp => Number.isFinite(inp));
+
+        const allPositive = (...inputs) => inputs.every(inp => inp > 0);
+
         e.preventDefault();
+
+        //Get data from form
+        const type = inputType.value;
+        const distance = +inputDistance.value;
+        const duration = +inputDuration.value;
+
+        //if running, create running object
+        if (type === 'running') {
+            const cadence = +inputCadence.value;
+            if (!validInputs(distance, duration, cadence) || !allPositive(distance, duration, cadence))
+                return alert('Input have to be positive number');
+        };
+
+        //if cycling, create cycling object
+        if (type === 'cycling') {
+            const elevation = +inputElevation.value;
+            if (!validInputs(distance, duration, elevation) || !allPositive(distance, duration))
+                return alert('Input have to be positive number');
+        };
+
 
         inputDistance.value = inputDuration.value = inputCadence.value = inputElevation.value = '';
 
